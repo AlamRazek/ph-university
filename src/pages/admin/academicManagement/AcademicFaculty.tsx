@@ -1,8 +1,29 @@
+import { Table, TableColumnsType } from "antd";
+import { useGetAllFacultiesQuery } from "../../../redux/features/admin/academmicManagement.api";
+import { TTAbleData } from "./AcademicSemester";
+
 const AcademicFaculty = () => {
+  const {
+    data: facultyData,
+
+    isFetching,
+  } = useGetAllFacultiesQuery();
+
+  const tableData = facultyData?.data?.map(({ _id, name }) => ({
+    key: _id,
+    name,
+  }));
+
+  const columns: TableColumnsType<TTAbleData> = [
+    {
+      title: "Name",
+      key: "name",
+      dataIndex: "name",
+    },
+  ];
+
   return (
-    <div>
-      <h1>Academic faculty page</h1>
-    </div>
+    <Table loading={isFetching} dataSource={tableData} columns={columns} />
   );
 };
 

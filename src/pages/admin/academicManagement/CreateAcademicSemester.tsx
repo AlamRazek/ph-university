@@ -5,7 +5,10 @@ import { Button, Col, Flex } from "antd";
 import PHSelect from "../../../components/form/PHSelect";
 import { monthOptions } from "../../../constant/gloval";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { academicSemesterSchema } from "../../../schemas/academicManagementSchema";
+import { useAddAcademicSemesterMutation } from "../../../redux/features/admin/academmicManagement.api";
+import { toast } from "sonner";
+import { TResponse } from "../../../types";
 
 const nameOptions = [
   {
@@ -29,23 +32,32 @@ const yearOptions = [0, 1, 2, 3, 4, 5, 6].map((number) => ({
 }));
 
 const CreateAcademicSemester = () => {
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+  const [addAcademicSemester] = useAddAcademicSemesterMutation();
+
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const name = nameOptions[Number(data?.name) - 1]?.label;
+
+    const toastId = toast.loading("Creating...");
 
     const semisterData = {
       name,
       code: data.name,
       year: data.year,
+      startMonth: data.startMonth,
+      endMonth: data.endMonth,
     };
-    console.log(semisterData);
-  };
 
-  const academicSemesterSchema = z.object({
-    name: z.string({ required_error: "Please select a Name" }),
-    name: z.string({ required_error: "Please select a Year" }),
-    name: z.string({ required_error: "Please select a Start Month" }),
-    name: z.string({ required_error: "Please select a End Month" }),
-  });
+    try {
+      const res = (await addAcademicSemester(semisterData)) as TResponse<any>;
+      if (res.error) {
+        toast.error(res.error.data.message, { id: toastId });
+      } else {
+        toast.success("Semester Created", { id: toastId });
+      }
+    } catch (err) {
+      toast.error("Something went wrong", { id: toastId });
+    }
+  };
 
   return (
     <Flex justify="center" align="center" style={{ height: "200vh" }}>
@@ -55,7 +67,7 @@ const CreateAcademicSemester = () => {
           resolver={zodResolver(academicSemesterSchema)}
         >
           <PHSelect label="Name" name="name" options={nameOptions} />
-          <PHSelect label="Year" name="Year" options={yearOptions} />
+          <PHSelect label="Year" name="year" options={yearOptions} />
           <PHSelect
             label="Start Month"
             name="startMonth"
