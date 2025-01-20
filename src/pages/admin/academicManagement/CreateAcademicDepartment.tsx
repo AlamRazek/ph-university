@@ -2,9 +2,14 @@ import { Button, Col, Flex } from "antd";
 import PHform from "../../../components/form/PHform";
 import PHSelect from "../../../components/form/PHSelect";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useGetAllFacultiesQuery } from "../../../redux/features/admin/academmicManagement.api";
+import {
+  useAddAcademicDepartmentMutation,
+  useGetAllFacultiesQuery,
+} from "../../../redux/features/admin/academmicManagement.api";
 import { FieldValues, SubmitHandler } from "react-hook-form";
 import { academicDepartmentSchema } from "../../../schemas/academicManagementSchema";
+import { toast } from "sonner";
+import { TResponse } from "../../../types";
 
 const departmentsData = [
   {
@@ -57,7 +62,16 @@ const departmentsData = [
 ];
 
 const CreateAcademicDepartment = () => {
-  const { data: facultyData, isFetching } = useGetAllFacultiesQuery(undefined);
+  const {
+    data: facultyData,
+    isFetching,
+    isError,
+  } = useGetAllFacultiesQuery(undefined);
+  const [addAcademicDepartment] = useAddAcademicDepartmentMutation();
+
+  if (isFetching) {
+    return <p>Loading faculties...</p>;
+  }
 
   const dataFaculty =
     facultyData?.data?.map((faculty) => ({
@@ -65,25 +79,55 @@ const CreateAcademicDepartment = () => {
       value: faculty._id,
     })) || [];
 
-  if (isFetching) {
-    return <p>Loading faculties...</p>;
-  }
-
-  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    console.log("this is data", data);
-  };
-
   // const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-  //   // const name1 = departmentsData[Number(data?.department) - 1]?.label;
-  //   // const name2 = dataFaculty[Number(data?.faculty) - 1]?.label;
-  //   // console.log(name1);
-  //   // console.log(name2);
+  //   const name1 = departmentsData[Number(data?.department) - 1]?.label;
+  //   const name2 = dataFaculty[Number(data?.faculty) - 1]?.label;
+  //   console.log(name1);
+  //   console.log(name2);
   //   console.log("hello", data);
   // };
 
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const department = departmentsData.find(
+      (item) => item.value === data?.name
+    );
+    const faculty = dataFaculty.find(
+      (item) => item.value === data?.academicFaculty
+    );
+
+    const departmentName = department?.label || "Department not found";
+    const academicFacultyName = faculty?.value || "Faculty not found";
+
+    const departmentData = {
+      name: departmentName,
+      academicFaculty: academicFacultyName,
+    };
+    const toastId = toast.loading("Creating...");
+
+    try {
+      const res = (await addAcademicDepartment(
+        departmentData
+      )) as TResponse<any>;
+      console.log(res);
+
+      if (res.error) {
+        toast.error(res.error.data.message, { id: toastId });
+      } else {
+        toast.success("Semester Created", { id: toastId });
+      }
+    } catch (err) {
+      toast.error("Something went wrong", { id: toastId });
+    }
+    console.log(departmentData);
+  };
+
+  if (isError) {
+    return <p>Error loading faculties</p>;
+  }
+
   return (
     <div>
-      <Flex justify="center" align="center" style={{ height: "100vh" }}>
+      {/* <Flex justify="center" align="center" style={{ height: "100vh" }}>
         <Col span={8}>
           <PHform
             onSubmit={onSubmit}
@@ -93,6 +137,26 @@ const CreateAcademicDepartment = () => {
             <PHSelect
               label="Department"
               name="department"
+              options={departmentsData}
+            />
+            <Button htmlType="submit">Submit</Button>
+          </PHform>
+        </Col>
+      </Flex> */}
+      <Flex justify="center" align="center" style={{ height: "100vh" }}>
+        <Col span={8}>
+          <PHform
+            onSubmit={onSubmit}
+            resolver={zodResolver(academicDepartmentSchema)}
+          >
+            <PHSelect
+              label="Academic Faculty"
+              name="academicFaculty"
+              options={dataFaculty}
+            />
+            <PHSelect
+              label="Department"
+              name="name"
               options={departmentsData}
             />
             <Button htmlType="submit">Submit</Button>
