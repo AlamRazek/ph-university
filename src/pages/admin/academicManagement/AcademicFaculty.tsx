@@ -7,7 +7,7 @@ const AcademicFaculty = () => {
     data: facultyData,
 
     isFetching,
-  } = useGetAllFacultiesQuery();
+  } = useGetAllFacultiesQuery([]);
 
   const tableData = facultyData?.data?.map(({ _id, name }) => ({
     key: _id,
