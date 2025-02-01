@@ -6,9 +6,9 @@ import PHSelect from "../../../components/form/PHSelect";
 import { monthOptions } from "../../../constant/gloval";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { academicSemesterSchema } from "../../../schemas/academicManagementSchema";
-import { useAddAcademicSemesterMutation } from "../../../redux/features/admin/academmicManagement.api";
+
 import { toast } from "sonner";
-import { TResponse } from "../../../types";
+import { useGetAllSemestersQuery } from "../../../redux/features/admin/academmicManagement.api";
 
 const nameOptions = [
   {
@@ -26,19 +26,30 @@ const nameOptions = [
 ];
 
 const SemesterRegistration = () => {
+  const { data: academicSemester } = useGetAllSemestersQuery([
+    { name: "sort", value: "year" },
+  ]);
+
+  const academicSemesterOptions = academicSemester?.data?.map((item) => ({
+    value: item._id,
+    label: `${item.name} ${item.year}`,
+  }));
+
+  console.log(academicSemester);
+
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const name = nameOptions[Number(data?.name) - 1]?.label;
 
     const toastId = toast.loading("Creating...");
 
-    const semisterData = {
+    const semesterData = {
       name,
       code: data.name,
       year: data.year,
       startMonth: data.startMonth,
       endMonth: data.endMonth,
     };
-    console.log(semisterData);
+    console.log(semesterData);
 
     // try {
     //   const res = (await addAcademicSemester(semisterData)) as TResponse<any>;
@@ -59,7 +70,11 @@ const SemesterRegistration = () => {
           onSubmit={onSubmit}
           resolver={zodResolver(academicSemesterSchema)}
         >
-          <PHSelect label="Name" name="name" options={nameOptions} />
+          <PHSelect
+            label="Name"
+            name="name"
+            options={academicSemesterOptions}
+          />
 
           <PHSelect
             label="Start Month"
