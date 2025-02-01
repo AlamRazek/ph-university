@@ -1,14 +1,13 @@
 import { FieldValues, SubmitHandler } from "react-hook-form";
 import PHform from "../../../components/form/PHform";
-
 import { Button, Col, Flex } from "antd";
 import PHSelect from "../../../components/form/PHSelect";
 import { monthOptions } from "../../../constant/gloval";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { academicSemesterSchema } from "../../../schemas/academicManagementSchema";
-
 import { toast } from "sonner";
 import { useGetAllSemestersQuery } from "../../../redux/features/admin/academmicManagement.api";
+import { semesterStatusOptions } from "../../../constant/semester";
 
 const nameOptions = [
   {
@@ -77,9 +76,9 @@ const SemesterRegistration = () => {
           />
 
           <PHSelect
-            label="Start Month"
-            name="startMonth"
-            options={monthOptions}
+            label="status"
+            name="Status"
+            options={semesterStatusOptions}
           />
           <PHSelect label="End Month" name="endMonth" options={monthOptions} />
 
