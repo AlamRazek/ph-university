@@ -50,12 +50,9 @@ const academicManagementApi = baseApi.injectEndpoints({
 
     getAllFaculties: builder.query({
       query: () => {
-        const params = new URLSearchParams();
-
         return {
           url: "/academic-faculties",
           method: "GET",
-          params: params,
         };
       },
       transformResponse: (response: TResponseRedux<TAcademicSemester[]>) => {
@@ -78,12 +75,9 @@ const academicManagementApi = baseApi.injectEndpoints({
 
     getAllDepartment: builder.query({
       query: () => {
-        const params = new URLSearchParams();
-
         return {
           url: "/academic-departments",
           method: "GET",
-          params: params,
         };
       },
       transformResponse: (response: TResponseRedux<TAcademicDepartment[]>) => {
