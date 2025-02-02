@@ -23,24 +23,27 @@ const SemesterRegistration = () => {
     label: `${item.name} ${item.year}`,
   }));
 
-  console.log(academicSemester);
-
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const toastId = toast.loading("Creating...");
 
     const semesterData = {
       ...data,
+      minCredit: Number(data.minCredit),
+      maxCredit: Number(data.maxCredit),
     };
     console.log(semesterData);
 
     try {
       const res = (await addSemester(semesterData)) as TResponse<any>;
+      console.log("API Response:", res);
       if (res.error) {
         toast.error(res.error.data.message, { id: toastId });
+        console.error("Error Details:", res.error);
       } else {
         toast.success("Semester Created", { id: toastId });
       }
     } catch (err) {
+      console.error("Request failed:", err);
       toast.error("Something went wrong", { id: toastId });
     }
   };
@@ -50,14 +53,14 @@ const SemesterRegistration = () => {
       <Col span={6}>
         <PHform onSubmit={onSubmit}>
           <PHSelect
-            label="Name"
-            name="name"
+            label="Academic Semester"
+            name="academicSemester"
             options={academicSemesterOptions}
           />
 
           <PHSelect
             label="status"
-            name="Status"
+            name="status"
             options={semesterStatusOptions}
           />
           <PHDatePicker name="startDate" label="Start Date" />
